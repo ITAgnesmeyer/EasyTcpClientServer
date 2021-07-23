@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 
@@ -14,6 +16,10 @@ namespace EasyTcpClientServer
         private readonly int _SendTimeOut;
         private readonly List<RequestProcessBase> _RequestProcesses;
 
+        public List<RequestProcessBase> RequestProcesses
+        {
+            get => this._RequestProcesses;
+        } 
         public string Ip { get; private set; }
 
         public int Port { get; private set; }
@@ -179,7 +185,55 @@ namespace EasyTcpClientServer
         {
             this._RequestProcesses.Add(process);
         }
+        public void RegisterFromFolder(string folder)
+        {
+            if (!Directory.Exists(folder))
+            {
+                throw new DirectoryNotFoundException("Folder not found:" + folder);
+            }
 
+            DirectoryInfo dirInfo = new DirectoryInfo(folder);
+            var files = dirInfo.GetFiles("*.ClientAddIn.dll");
+            if (files.Length == 0)
+                throw new FileNotFoundException("Could not find DLL's in folder:" + folder);
+            foreach (FileInfo fileInfo in files)
+            {
+                try
+                {
+                    var assembly = Assembly.LoadFile(fileInfo.FullName);
+                    var types = assembly.GetTypes();
+                    foreach (Type type in types)
+                    {
+                        if (type.BaseType == typeof( RequestProcessBase))
+                        {
+                            try
+                            {
+                                var obj = (RequestProcessBase)Activator.CreateInstance(type, true);
+                                this.RegisterRequestProcess(obj);
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine(e);
+                                
+                            }
+                            
+
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    
+                }
+            }
+
+            if (this._RequestProcesses.Count <= 0)
+            {
+                throw new FileNotFoundException("Could not find any DLL containing RequestProcess - Class");
+            }
+
+        }
         public void Send()
         {
             SendRequestMessages();

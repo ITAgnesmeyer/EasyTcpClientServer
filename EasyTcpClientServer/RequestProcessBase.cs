@@ -8,7 +8,7 @@ namespace EasyTcpClientServer
     public abstract class RequestProcessBase
     {
         public bool SendBackToClient { get; }
-        public string ReturnMessage { get; set;}
+        public string ReturnMessage { get; protected set;}
 
         public bool Success { get; private set; }
 

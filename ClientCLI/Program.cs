@@ -1,46 +1,20 @@
 ﻿using System;
+using System.Linq;
 using EasyTcpClientServer;
 namespace ClientCLI
 {
-    public class RequestProcessGa:RequestProcessBase 
-    {
-        public RequestProcessGa():base(true,"Hallo")
-        {
-            this.NextMessageToSend = "hallo";
-        }
-        protected override void Process(string message)
-        {
-            
-            switch (message)
-            {
-                case "aaa":
-                    //Console.WriteLine(@"Message:" + message);
-                    this.NextMessageToSend = "bbb";
-                    
-                    break;
-
-                case "bbb":
-                    this.NextMessageToSend = "aaa";
-                    
-                    break;
-                default:
-                    this.ReturnMessage = "";
-                    break;
-            }
-        }
-    }
-
     class Program
     {
         static void Main(string[] args)
         {
             using (var client = new TCPClient("127.0.0.1", 12221))
             {
-                var req = new RequestProcessGa();
-                client.RegisterRequestProcess(req);
+               
+                client.RegisterFromFolder(".\\");
                 AttachEvents(client);
                 client.Start();
                 Console.WriteLine(@"Enter exit to quit!");
+                var req = client.RequestProcesses.First();
                 string line;
                 do
                 {

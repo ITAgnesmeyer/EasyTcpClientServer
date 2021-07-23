@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Threading;
 
 namespace EasyTcpClientServer
@@ -77,6 +79,55 @@ namespace EasyTcpClientServer
             this._RequestProcesses.Add(process);
         }
 
+        public void RegisterFromFolder(string folder)
+        {
+            if (!Directory.Exists(folder))
+            {
+                throw new DirectoryNotFoundException("Folder not found:" + folder);
+            }
+
+            DirectoryInfo dirInfo = new DirectoryInfo(folder);
+            var files = dirInfo.GetFiles("*.ServerAddIn.dll");
+            if (files.Length == 0)
+                throw new FileNotFoundException("Could not find DLL's in folder:" + folder);
+            foreach (FileInfo fileInfo in files)
+            {
+                try
+                {
+                    var assembly = Assembly.LoadFile(fileInfo.FullName);
+                    var types = assembly.GetTypes();
+                    foreach (Type type in types)
+                    {
+                        if (type.BaseType == typeof( RequestProcessBase))
+                        {
+                            try
+                            {
+                                var obj = (RequestProcessBase)Activator.CreateInstance(type, true);
+                                this.RegisterRequestProcess(obj);
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine(e);
+                                
+                            }
+                            
+
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    
+                }
+            }
+
+            if (this._RequestProcesses.Count <= 0)
+            {
+                throw new FileNotFoundException("Could not find any DLL containing RequestProcess - Class");
+            }
+
+        }
         /// <summary>
         /// Stops receiving incoming requests.
         /// </summary>
