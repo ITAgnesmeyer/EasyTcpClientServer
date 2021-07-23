@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net5.0;net6.0</TargetFrameworks>
+    <SignAssembly>True</SignAssembly>
+    <DelaySign>False</DelaySign>
+    <Description>Small TCP Server Client</Description>
+    <AssemblyVersion>1.0.0.1</AssemblyVersion>
+    <FileVersion>1.0.0.1</FileVersion>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageTags>TCP-Server, TCP-Client</PackageTags>
+    <Copyright>Copyright ©  2021 Dipl.-Ing.(FH) Guido Agnesmeyer</Copyright>
+    <AssemblyOriginatorKeyFile>diga.snk</AssemblyOriginatorKeyFile>
+    <Version>1.0.0.1</Version>
+    <Authors>Dipl.-Ing.(FH) Guido Agnesmeyer</Authors>
+  </PropertyGroup>
+
+</Project>
