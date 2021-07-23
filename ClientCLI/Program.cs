@@ -34,8 +34,8 @@ namespace ClientCLI
     {
         static void Main(string[] args)
         {
-            TCPClient client = new TCPClient("127.0.0.1", 12221);
-            RequestProcessGa req = new RequestProcessGa();
+            var client = new TCPClient("127.0.0.1", 12221);
+            var req = new RequestProcessGa();
             client.RegisterRequestProcess(req);
             AttachEvents(client);
             client.Start();

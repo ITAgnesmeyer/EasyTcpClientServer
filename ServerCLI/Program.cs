@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using EasyTcpClientServer;
 namespace ServerCLI
 {
@@ -41,8 +37,8 @@ namespace ServerCLI
     {
         static void Main(string[] args)
         {
-            TCPServer server = new TCPServer("127.0.0.1", 12221);
-            RequstProcessGa req = new RequstProcessGa();
+            var server = new TCPServer("127.0.0.1", 12221);
+            var req = new RequstProcessGa();
             server.RegisterRequestProcess(req);
 
             AttachEvents(server);
