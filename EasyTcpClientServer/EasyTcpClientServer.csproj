@@ -12,8 +12,11 @@
     <PackageTags>TCP-Server, TCP-Client</PackageTags>
     <Copyright>Copyright ©  2021 Dipl.-Ing.(FH) Guido Agnesmeyer</Copyright>
     <AssemblyOriginatorKeyFile>diga.snk</AssemblyOriginatorKeyFile>
-    <Version>1.0.0.1</Version>
+    <Version>1.0.0.2</Version>
     <Authors>Dipl.-Ing.(FH) Guido Agnesmeyer</Authors>
+    <Owners>Dipl.-Ing.(FH) Guido Agnesmeyer</Owners>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/ITAgnesmeyer/EasyTcpClientServer</RepositoryUrl>
   </PropertyGroup>
 
 </Project>
