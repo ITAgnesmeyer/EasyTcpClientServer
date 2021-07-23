@@ -33,9 +33,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="EasyTcpClientServer, Version=1.0.0.1, Culture=neutral, PublicKeyToken=ccf87678d138604a, processorArchitecture=MSIL">
-      <HintPath>..\packages\EasyTcpClientServer.1.0.0.2\lib\netstandard2.0\EasyTcpClientServer.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -51,7 +48,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EasyTcpClientServer\EasyTcpClientServer.csproj">
+      <Project>{14573c8e-7098-40ff-9bc9-b0ee95b6949a}</Project>
+      <Name>EasyTcpClientServer</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

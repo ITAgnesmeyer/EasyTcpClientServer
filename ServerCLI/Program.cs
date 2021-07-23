@@ -37,19 +37,21 @@ namespace ServerCLI
     {
         static void Main(string[] args)
         {
-            var server = new TCPServer("127.0.0.1", 12221);
-            var req = new RequstProcessGa();
-            server.RegisterRequestProcess(req);
+            using (var server = new TCPServer("127.0.0.1", 12221))
+            {
+                var req = new RequstProcessGa();
+                server.RegisterRequestProcess(req);
 
-            AttachEvents(server);
-            server.Start();
+                AttachEvents(server);
+                server.Start();
 
-            Console.WriteLine("Press any key to exit!");
+                Console.WriteLine("Press any key to exit!");
 
-            Console.ReadKey();
-            DetachEvents(server);
+                Console.ReadKey();
+                DetachEvents(server);
+            }
+          
 
-            server.Stop();
         }
 
         static void AttachEvents(TCPServer server)

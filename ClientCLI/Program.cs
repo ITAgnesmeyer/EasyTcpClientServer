@@ -34,22 +34,25 @@ namespace ClientCLI
     {
         static void Main(string[] args)
         {
-            var client = new TCPClient("127.0.0.1", 12221);
-            var req = new RequestProcessGa();
-            client.RegisterRequestProcess(req);
-            AttachEvents(client);
-            client.Start();
-            Console.WriteLine(@"Press any key to exit!");
-            string line;
-            do
+            using (var client = new TCPClient("127.0.0.1", 12221))
             {
-                line = Console.ReadLine();
-                req.NextMessageToSend =   line;
-                client.Send();
-            } while (line != "exit");
+                var req = new RequestProcessGa();
+                client.RegisterRequestProcess(req);
+                AttachEvents(client);
+                client.Start();
+                Console.WriteLine(@"Enter exit to quit!");
+                string line;
+                do
+                {
+                    line = Console.ReadLine();
+                    req.NextMessageToSend =   line;
+                    client.Send();
+                } while (line != "exit");
 
-            DetachEvents(client);
-            client.Stop();
+                DetachEvents(client);
+
+            }
+            
         }
 
         static void AttachEvents(TCPClient server)

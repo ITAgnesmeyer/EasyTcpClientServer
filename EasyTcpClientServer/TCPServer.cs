@@ -8,7 +8,7 @@ namespace EasyTcpClientServer
 {
     // ReSharper disable once InconsistentNaming
     // ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
-    public class TCPServer
+    public class TCPServer: IDisposable
     {
         #region Fields.
 
@@ -184,6 +184,11 @@ namespace EasyTcpClientServer
             }
 
             throw new Exception("Local IP Address Not Found!");
+        }
+
+        public void Dispose()
+        {
+            Stop();
         }
     }
 }
