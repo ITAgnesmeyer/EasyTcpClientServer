@@ -9,7 +9,7 @@ namespace ServerCLI
             using (var server = new TCPServer("127.0.0.1", 12221))
             {
                 
-                server.RegisterFromFolder(".\\server");
+                server.RegisterFromFolder(".\\");
 
                 AttachEvents(server);
                 server.Start();

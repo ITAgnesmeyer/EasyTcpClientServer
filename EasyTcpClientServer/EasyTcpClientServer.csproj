@@ -5,14 +5,14 @@
     <SignAssembly>True</SignAssembly>
     <DelaySign>False</DelaySign>
     <Description>Small TCP Server Client</Description>
-    <AssemblyVersion>1.0.0.1</AssemblyVersion>
-    <FileVersion>1.0.0.1</FileVersion>
+    <AssemblyVersion>1.0.0.3</AssemblyVersion>
+    <FileVersion>1.0.0.3</FileVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageTags>TCP-Server, TCP-Client</PackageTags>
     <Copyright>Copyright ©  2021 Dipl.-Ing.(FH) Guido Agnesmeyer</Copyright>
     <AssemblyOriginatorKeyFile>diga.snk</AssemblyOriginatorKeyFile>
-    <Version>1.0.0.2</Version>
+    <Version>1.0.0.3</Version>
     <Authors>Dipl.-Ing.(FH) Guido Agnesmeyer</Authors>
     <Owners>Dipl.-Ing.(FH) Guido Agnesmeyer</Owners>
     <RepositoryType>git</RepositoryType>

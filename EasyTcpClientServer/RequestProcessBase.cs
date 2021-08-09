@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Text;
 
@@ -23,8 +24,14 @@ namespace EasyTcpClientServer
         }
 
        
-        public static void SentMessageToClient(TcpClient client, string message)
+        public static void SendMessageToClient(TcpClient client, string message)
         {
+            if (!client.Connected)
+            {
+                Console.WriteLine("SendMessageToClient:client not connected");
+                return;
+            }
+                
             var buf = Encoding.ASCII.GetBytes(message);
             
             var stream = client.GetStream();
@@ -61,7 +68,7 @@ namespace EasyTcpClientServer
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error:" + e.Message);
+                Debug.Print( "Error:" + e.Message);
                 length = 0;
                 return "";
             }

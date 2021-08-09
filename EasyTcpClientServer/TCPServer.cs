@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -152,7 +153,7 @@ namespace EasyTcpClientServer
         #region Private.
 
         //Process single request.
-        private void ProcessRequest(IAsyncResult ar)
+        private  void ProcessRequest(IAsyncResult ar)
         {
             //Stop if operation was cancelled.
             if (this._Stop)
@@ -173,8 +174,9 @@ namespace EasyTcpClientServer
 
             //Starts waiting for the next request.
             listener.BeginAcceptTcpClient(ProcessRequest, listener);
-
+            //listener.AcceptTcpClientAsync()
             TcpClient client = listener.EndAcceptTcpClient(ar);
+            //TcpClient client = await listener.AcceptTcpClientAsync(); //listener.EndAcceptTcpClient(ar);
 
             while (client.Connected == false)
             {
@@ -187,12 +189,25 @@ namespace EasyTcpClientServer
                 string message = RequestProcessBase.GetClientMessage(client, ref bytesRead);
                 if (bytesRead == 0)
                 {
+                  
                     client.Close();
-                    break;
+                   break;
+
                 }
 
                 if (message != string.Empty)
-                    ExecuteRequestProcess(client, message);
+                {
+                    try
+                    {
+                        ExecuteRequestProcess(client, message);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.Print(e.Message);
+                    }
+                    
+                }
+                    
             }
         }
 
@@ -204,7 +219,7 @@ namespace EasyTcpClientServer
                 if (item.Success)
                 {
                     if (item.SendBackToClient)
-                        RequestProcessBase.SentMessageToClient(client, item.ReturnMessage);
+                        RequestProcessBase.SendMessageToClient(client, item.ReturnMessage);
 
                     RequestProcessSuccessEventArgs e = new RequestProcessSuccessEventArgs {Message = message};
                     OnRequestProcessSuccess(item, e);

@@ -37,6 +37,7 @@ namespace EasyTcpClientServer
         private void InitTcpClient()
         {
             this._TcpClient = new TcpClient();
+            
             this._TcpClient.Client.Poll(1000, SelectMode.SelectWrite);
             try
             {
@@ -50,7 +51,9 @@ namespace EasyTcpClientServer
                 //throw;
                 if (this._TcpClient != null)
                 {
-                    if (this._TcpClient.Connected) this._TcpClient.Close();
+                    if (this._TcpClient.Connected) 
+                        this._TcpClient.Close();
+                    this._TcpClient.Dispose();
                     this._TcpClient = null;
                 }
             }
@@ -67,6 +70,7 @@ namespace EasyTcpClientServer
                     InitTcpClient();
                 if ((this._TcpClient.Connected == false))
                 {
+                    this._TcpClient?.Dispose();
                     this._TcpClient = null;
                     InitTcpClient();
                 }
@@ -83,15 +87,15 @@ namespace EasyTcpClientServer
 
                         StringBuilder sb = new StringBuilder();
                         int counter = netStream.Read(bytes, 0, bytes.Length);
-                        string data = Encoding.Default.GetString(bytes, 0, counter);
+                        string data = Encoding.ASCII.GetString(bytes, 0, counter);
 
                         sb.Append(data);
                         while ((netStream.DataAvailable))
                         {
                             counter = netStream.Read(bytes, 0, bytes.Length);
-                            data = Encoding.UTF8.GetString(bytes, 0, counter);
+                            data = Encoding.ASCII.GetString(bytes, 0, counter);
                             sb.Append(data);
-                            Thread.Sleep(100);
+                            //Thread.Sleep(100);
                         }
 
                         returnValue = sb.ToString();
