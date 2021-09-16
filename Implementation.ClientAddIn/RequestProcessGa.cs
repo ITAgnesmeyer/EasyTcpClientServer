@@ -1,31 +1,32 @@
 ﻿using System;
+using System.Text;
 using EasyTcpClientServer;
 
 namespace Implementation.ClientAddIn
 {
     public class RequestProcessGa:RequestProcessBase 
     {
-        public RequestProcessGa():base(true,"Hallo")
+        public RequestProcessGa():base(true,Encoding.ASCII.GetBytes("Hallo"))
         {
-            this.NextMessageToSend = "hallo";
+            this.NextMessageToSend = Encoding.ASCII.GetBytes( "hallo");
         }
-        protected override void Process(string message)
+        protected override void Process(byte[] message)
         {
-            
-            switch (message)
+            string msg = Encoding.ASCII.GetString(message);
+            switch (msg)
             {
                 case "aaa":
                     //Console.WriteLine(@"Message:" + message);
-                    this.NextMessageToSend = "bbb";
+                    this.NextMessageToSend = Encoding.ASCII.GetBytes( "bbb");
                     
                     break;
 
                 case "bbb":
-                    this.NextMessageToSend = "aaa";
+                    this.NextMessageToSend =Encoding.ASCII.GetBytes( "aaa");
                     
                     break;
                 default:
-                    this.ReturnMessage = "";
+                    this.ReturnMessage = Encoding.ASCII.GetBytes("");
                     break;
             }
         }

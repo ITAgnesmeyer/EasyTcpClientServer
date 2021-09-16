@@ -4,7 +4,7 @@ namespace EasyTcpClientServer
 {
     public class RequestProcessSuccessEventArgs:EventArgs
     {
-        public string Message { get; set; }
+        public byte[] Message { get; set; }
 
         public RequestProcessSuccessEventArgs()
         {
@@ -12,7 +12,7 @@ namespace EasyTcpClientServer
         }
 
         // ReSharper disable once UnusedMember.Global
-        public RequestProcessSuccessEventArgs(string message)
+        public RequestProcessSuccessEventArgs(byte[] message)
         {
             this.Message = message;
         }

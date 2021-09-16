@@ -19,7 +19,7 @@ namespace EasyTcpClientServer
         public List<RequestProcessBase> RequestProcesses
         {
             get => this._RequestProcesses;
-        } 
+        }
         public string Ip { get; private set; }
 
         public int Port { get; private set; }
@@ -37,7 +37,7 @@ namespace EasyTcpClientServer
         private void InitTcpClient()
         {
             this._TcpClient = new TcpClient();
-            
+
             this._TcpClient.Client.Poll(1000, SelectMode.SelectWrite);
             try
             {
@@ -51,7 +51,7 @@ namespace EasyTcpClientServer
                 //throw;
                 if (this._TcpClient != null)
                 {
-                    if (this._TcpClient.Connected) 
+                    if (this._TcpClient.Connected)
                         this._TcpClient.Close();
                     this._TcpClient.Dispose();
                     this._TcpClient = null;
@@ -60,9 +60,9 @@ namespace EasyTcpClientServer
         }
 
 
-        private string SendRequest(string cmd)
+        private byte[] SendRequest(byte[] cmd)
         {
-            string returnValue = null;
+            byte[] returnValue = Array.Empty<byte>();
 
             try
             {
@@ -75,30 +75,22 @@ namespace EasyTcpClientServer
                     InitTcpClient();
                 }
 
-                byte[] buf = Encoding.ASCII.GetBytes(cmd);
+
                 using (NetworkStream netStream = this._TcpClient.GetStream())
                 {
                     // Schreiben der Daten
-                    netStream.Write(buf, 0, buf.Length);
+                    netStream.Write(cmd, 0, cmd.Length);
 
                     if (netStream.CanRead)
                     {
-                        byte[] bytes = new byte[2049];
+                        byte[] bytes = new byte[8192];
 
-                        StringBuilder sb = new StringBuilder();
+
                         int counter = netStream.Read(bytes, 0, bytes.Length);
-                        string data = Encoding.ASCII.GetString(bytes, 0, counter);
+                        returnValue = new byte[counter];
+                        Array.Copy(bytes, 0, returnValue, 0, returnValue.Length);
 
-                        sb.Append(data);
-                        while ((netStream.DataAvailable))
-                        {
-                            counter = netStream.Read(bytes, 0, bytes.Length);
-                            data = Encoding.ASCII.GetString(bytes, 0, counter);
-                            sb.Append(data);
-                            //Thread.Sleep(100);
-                        }
 
-                        returnValue = sb.ToString();
                     }
 
 
@@ -125,14 +117,13 @@ namespace EasyTcpClientServer
 
         private void SendRequestMessage(RequestProcessBase requestProcess)
         {
-            string response = SendRequest(requestProcess.NextMessageToSend);
-            requestProcess.NextMessageToSend = "";
-            if (string.IsNullOrEmpty(response))
-                response = "";
+            byte[] response = SendRequest(requestProcess.NextMessageToSend);
+            requestProcess.NextMessageToSend = Array.Empty<byte>();
+
             ExecuteRequestProcess(requestProcess, response);
         }
 
-        private void ExecuteRequestProcess(RequestProcessBase requestProcess, string data)
+        private void ExecuteRequestProcess(RequestProcessBase requestProcess, byte[] data)
         {
             requestProcess.Start(data);
             if (!requestProcess.Success)
@@ -146,12 +137,12 @@ namespace EasyTcpClientServer
             }
             else
             {
-                
+
                 OnRequestProcessSuccess(requestProcess, new RequestProcessSuccessEventArgs()
                 {
                     Message = data
                 });
-                if (!string.IsNullOrEmpty( requestProcess.NextMessageToSend) && data != requestProcess.NextMessageToSend && requestProcess.SendBackToClient)
+                if (requestProcess.NextMessageToSend.Length > 0 && data != requestProcess.NextMessageToSend && requestProcess.SendBackToClient)
                     this.Send();
             }
         }
@@ -169,7 +160,7 @@ namespace EasyTcpClientServer
         {
             RequestProcessErrorEventArgs requestProcessErrorEventArg = new RequestProcessErrorEventArgs()
             {
-                ClientMessage = string.Empty,
+                ClientMessage = Array.Empty<byte>(),
                 ExceptionMessage = ex.Message
             };
             return requestProcessErrorEventArg;
@@ -208,7 +199,7 @@ namespace EasyTcpClientServer
                     var types = assembly.GetTypes();
                     foreach (Type type in types)
                     {
-                        if (type.BaseType == typeof( RequestProcessBase))
+                        if (type.BaseType == typeof(RequestProcessBase))
                         {
                             try
                             {
@@ -218,9 +209,9 @@ namespace EasyTcpClientServer
                             catch (Exception e)
                             {
                                 Console.WriteLine(e);
-                                
+
                             }
-                            
+
 
                         }
                     }
@@ -228,7 +219,7 @@ namespace EasyTcpClientServer
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
-                    
+
                 }
             }
 

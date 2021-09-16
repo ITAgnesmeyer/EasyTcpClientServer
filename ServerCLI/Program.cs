@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using EasyTcpClientServer;
 namespace ServerCLI
 {
@@ -32,7 +33,8 @@ namespace ServerCLI
 
         private static void OnSuccess(object sender, RequestProcessSuccessEventArgs e)
         {
-            Console.WriteLine("Success:" + e.Message);
+            string msg = Encoding.ASCII.GetString(e.Message);
+            Console.WriteLine("Success:" + msg);
         }
 
         static void DetachEvents(TCPServer server)
@@ -44,7 +46,10 @@ namespace ServerCLI
 
         private static void OnError(object sender, RequestProcessErrorEventArgs e)
         {
-            if (sender == null && e.ClientMessage.StartsWith("-!"))
+            if (e.ClientMessage == null)
+                return;
+            string msg = Encoding.ASCII.GetString(e.ClientMessage);
+            if (sender == null && msg.StartsWith("-!"))
             {  }
             else
                 Console.WriteLine("Message:" + e.ClientMessage + "Exception:" + e.ExceptionMessage);

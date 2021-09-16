@@ -18,5 +18,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/ITAgnesmeyer/EasyTcpClientServer</RepositoryUrl>
   </PropertyGroup>
-
+  <PropertyGroup>
+    <DisableImplicitNamespaceImports>true</DisableImplicitNamespaceImports>
+  </PropertyGroup>
 </Project>

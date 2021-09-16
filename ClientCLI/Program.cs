@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using EasyTcpClientServer;
 namespace ClientCLI
 {
@@ -19,7 +20,12 @@ namespace ClientCLI
                 do
                 {
                     line = Console.ReadLine();
-                    req.NextMessageToSend =   line;
+                    req.NextMessageToSend = Array.Empty<byte>();
+                    if (line != null)
+                    {
+                        req.NextMessageToSend =  Encoding.ASCII.GetBytes( line);
+                    }
+                    
                     client.Send();
                 } while (line != "exit");
 
@@ -38,8 +44,8 @@ namespace ClientCLI
 
         private static void OnSuccess(object sender, RequestProcessSuccessEventArgs e)
         {
-            
-            Console.WriteLine(@"Success:" + e.Message);
+            string msg = Encoding.ASCII.GetString(e.Message);
+            Console.WriteLine(@"Success:" + msg);
         }
 
         static void DetachEvents(TCPClient server)
@@ -51,10 +57,13 @@ namespace ClientCLI
 
         private static void OnError(object sender, RequestProcessErrorEventArgs e)
         {
-            if (sender == null && e.ClientMessage.StartsWith("-!"))
+            if (e.ClientMessage == null)
+                return;
+            string msg = Encoding.ASCII.GetString(e.ClientMessage);
+            if (sender == null && msg.StartsWith("-!"))
             {  }
             else
-                Console.WriteLine(@"Message:" + e.ClientMessage + @"Exception:" + e.ExceptionMessage);
+                Console.WriteLine(@"Message:" + msg + @"Exception:" + e.ExceptionMessage);
         }
     }
 }

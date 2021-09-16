@@ -186,8 +186,8 @@ namespace EasyTcpClientServer
             while (client.Connected)
             {
                 int bytesRead = 0;
-                string message = RequestProcessBase.GetClientMessage(client, ref bytesRead);
-                if (bytesRead == 0)
+                byte[] message = RequestProcessBase.GetClientMessage(client, ref bytesRead);
+                if (!client.Connected )
                 {
                   
                     client.Close();
@@ -195,7 +195,7 @@ namespace EasyTcpClientServer
 
                 }
 
-                if (message != string.Empty)
+                if (message != Array.Empty<byte>())
                 {
                     try
                     {
@@ -203,7 +203,7 @@ namespace EasyTcpClientServer
                     }
                     catch (Exception e)
                     {
-                        Debug.Print(e.Message);
+                        Console.WriteLine( "ExecuteRequestProcess error:" + e.Message);
                     }
                     
                 }
@@ -211,7 +211,7 @@ namespace EasyTcpClientServer
             }
         }
 
-        private void ExecuteRequestProcess(TcpClient client, string message)
+        private void ExecuteRequestProcess(TcpClient client, byte[] message)
         {
             foreach (var item in this._RequestProcesses)
             {
@@ -219,7 +219,10 @@ namespace EasyTcpClientServer
                 if (item.Success)
                 {
                     if (item.SendBackToClient)
-                        RequestProcessBase.SendMessageToClient(client, item.ReturnMessage);
+                        if(item.ReturnMessage != Array.Empty<byte>())
+                            RequestProcessBase.SendMessageToClient(client, item.ReturnMessage);
+
+
 
                     RequestProcessSuccessEventArgs e = new RequestProcessSuccessEventArgs {Message = message};
                     OnRequestProcessSuccess(item, e);
