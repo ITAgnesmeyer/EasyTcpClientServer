@@ -11,7 +11,7 @@ namespace EasyTcpClientServer
     {
         public bool SendBackToClient { get; }
         public byte[] ReturnMessage { get; protected set; }
-        public List<byte[]> ReturnMessages { get; } 
+        public Queue<byte[]> ReturnMessages { get; } 
         public bool Success { get; private set; }
 
         public string ExceptionMessage { get; private set; }
@@ -20,7 +20,7 @@ namespace EasyTcpClientServer
 
         public RequestProcessBase(bool sendBackToClient, byte[] returnMessage)
         {
-            this.ReturnMessages = new List<byte[]>();
+            this.ReturnMessages = new Queue<byte[]>();
             this.SendBackToClient = sendBackToClient;
             this.ReturnMessage = returnMessage;
         }
@@ -35,7 +35,15 @@ namespace EasyTcpClientServer
             }
 
             var stream = client.GetStream();
-            stream.Write(message, 0, message.Length);
+           
+           IAsyncResult res = stream.BeginWrite(message, 0, message.Length, callback, client);
+            stream.EndWrite(res);
+            
+        }
+
+        private static void callback(IAsyncResult ar)
+        {
+            Debug.Print("rite");
         }
 
         internal void Start(byte[] clientMessage)

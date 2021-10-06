@@ -13,6 +13,7 @@ namespace EasyTcpClientServer
 
         public EasyNetWorkStream(Socket socket, bool ownsSocket) : base(socket, ownsSocket)
         {
+            
         }
 
         public EasyNetWorkStream(Socket socket, FileAccess access) : base(socket, access)

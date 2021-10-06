@@ -18,6 +18,7 @@ namespace Implementation.ServerAddIn
                 case "aaa":
                     Console.WriteLine("Message:" + msg);
                     this.ReturnMessage = this.Encoding.GetBytes("Alles ist gut");
+                    this.ReturnMessages.Enqueue(this.Encoding.GetBytes("Alles ist nicht gut"));
                     break;
 
                 case "bbb":

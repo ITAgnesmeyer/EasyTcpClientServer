@@ -95,7 +95,9 @@ namespace EasyTcpClientServer
             {
                 try
                 {
+                    
                     var assembly = Assembly.LoadFile(fileInfo.FullName);
+                    
                     var types = assembly.GetTypes();
                     foreach (Type type in types)
                     {
@@ -219,9 +221,32 @@ namespace EasyTcpClientServer
                 if (item.Success)
                 {
                     if (item.SendBackToClient)
-                        if(item.ReturnMessage != Array.Empty<byte>())
-                            RequestProcessBase.SendMessageToClient(client, item.ReturnMessage);
+                    {
 
+                        if (item.ReturnMessage != Array.Empty<byte>())
+                        {
+                            //Thread.Sleep(100);
+                            RequestProcessBase.SendMessageToClient(client, item.ReturnMessage);
+                            
+                        }
+
+                        if (item.ReturnMessages.Count > 0)
+                        {
+                            int len = item.ReturnMessages.Count;
+                            for (int i = 0; i < len; i++)
+                            {
+                                byte[] bytesToSend = item.ReturnMessages.Dequeue();
+                                if (bytesToSend != Array.Empty<byte>())
+                                {
+                                    //Thread.Sleep(100);
+                                    RequestProcessBase.SendMessageToClient(client, bytesToSend);
+                                }
+
+                            }
+                        }
+
+                    }
+                        
 
 
                     RequestProcessSuccessEventArgs e = new RequestProcessSuccessEventArgs {Message = message};

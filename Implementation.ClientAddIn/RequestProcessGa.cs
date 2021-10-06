@@ -21,7 +21,8 @@ namespace Implementation.ClientAddIn
                 case "aaa":
                     //Console.WriteLine(@"Message:" + message);
                     this.NextMessageToSend = this.Encoding.GetBytes( "bbb");
-                    this.ReturnMessages.Add(new byte[] { 0x80, 0x00, 0x00 });
+                    this.ReturnMessages.Enqueue( new byte[] { 0x80, 0x00, 0x00 });
+                    this.ReturnMessages.Enqueue(new byte[]{0x06, 0x0F, 0x00});
                     break;
 
                 case "bbb":

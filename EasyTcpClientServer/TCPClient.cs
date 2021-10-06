@@ -29,6 +29,7 @@ namespace EasyTcpClientServer
         public TCPClient(TcpClient client)
         {
             this._TcpClient = client;
+            this._TcpClient.NoDelay = true;
         }
         public TCPClient(string ip, int port)
         {
@@ -48,6 +49,7 @@ namespace EasyTcpClientServer
             try
             {
                 this._TcpClient.Connect(this.Ip, this.Port);
+                this._TcpClient.NoDelay = true;
                 this._TcpClient.ReceiveTimeout = this._WaitTimeOut;
                 this._TcpClient.SendTimeout = this._SendTimeOut;
             }
