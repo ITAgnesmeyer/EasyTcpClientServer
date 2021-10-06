@@ -12,22 +12,22 @@ namespace Implementation.ServerAddIn
         }
         protected override void Process(byte[] message)
         {
-            string msg = Encoding.ASCII.GetString(message);
+            string msg = this.Encoding.GetString(message);
             switch (msg)
             {
                 case "aaa":
                     Console.WriteLine("Message:" + msg);
-                    this.ReturnMessage = Encoding.ASCII.GetBytes("Alles ist gut");
+                    this.ReturnMessage = this.Encoding.GetBytes("Alles ist gut");
                     break;
 
                 case "bbb":
-                    this.ReturnMessage = Encoding.ASCII.GetBytes("Nicht implementiert");
+                    this.ReturnMessage = this.Encoding.GetBytes("Nicht implementiert");
                     break;
                 case "ccc":
-                    this.ReturnMessage = Encoding.ASCII.GetBytes("aaa");
+                    this.ReturnMessage = this.Encoding.GetBytes("aaa");
                     break;
                 case "ddd":
-                    this.ReturnMessage = Encoding.ASCII.GetBytes("bbb");
+                    this.ReturnMessage = this.Encoding.GetBytes("bbb");
                     break;
                 //default:
                 //    this.ReturnMessage = " ";

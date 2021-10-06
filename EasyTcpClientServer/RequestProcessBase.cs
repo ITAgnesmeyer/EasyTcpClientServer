@@ -26,7 +26,7 @@ namespace EasyTcpClientServer
         }
 
 
-        public static void SendMessageToClient(TcpClient client, byte[] message)
+        public static void SendMessageToClient(TCPClient client, byte[] message)
         {
             if (!client.Connected)
             {
@@ -42,6 +42,8 @@ namespace EasyTcpClientServer
         {
             try
             {
+                string str = this.Encoding.GetString(clientMessage);
+                Process(str);
                 Process(clientMessage);
                 this.Success = true;
             }
@@ -53,7 +55,7 @@ namespace EasyTcpClientServer
         }
 
         // ReSharper disable once RedundantAssignment
-        public static byte[] GetClientMessage(TcpClient client, ref int length)
+        public static byte[] GetClientMessage(TCPClient client, ref int length)
         {
             try
             {
@@ -83,7 +85,12 @@ namespace EasyTcpClientServer
             return returnString;
         }
 
+        protected virtual Encoding Encoding => Encoding.ASCII;
 
+        protected virtual void Process(string message)
+        {
+
+        }
 
         protected abstract void Process(byte[] message);
 

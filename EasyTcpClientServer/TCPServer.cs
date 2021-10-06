@@ -175,9 +175,9 @@ namespace EasyTcpClientServer
             //Starts waiting for the next request.
             listener.BeginAcceptTcpClient(ProcessRequest, listener);
             //listener.AcceptTcpClientAsync()
-            TcpClient client = listener.EndAcceptTcpClient(ar);
+            TCPClient client = new TCPClient(listener.EndAcceptTcpClient(ar));
             //TcpClient client = await listener.AcceptTcpClientAsync(); //listener.EndAcceptTcpClient(ar);
-
+            
             while (client.Connected == false)
             {
                 Thread.Sleep(10);
@@ -187,7 +187,7 @@ namespace EasyTcpClientServer
             {
                 int bytesRead = 0;
                 byte[] message = RequestProcessBase.GetClientMessage(client, ref bytesRead);
-                if (!client.Connected )
+                if (!client.IsStillConnected() )
                 {
                   
                     client.Close();
@@ -211,7 +211,7 @@ namespace EasyTcpClientServer
             }
         }
 
-        private void ExecuteRequestProcess(TcpClient client, byte[] message)
+        private void ExecuteRequestProcess(TCPClient client, byte[] message)
         {
             foreach (var item in this._RequestProcesses)
             {

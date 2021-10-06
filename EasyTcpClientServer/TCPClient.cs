@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Reflection;
@@ -24,6 +26,10 @@ namespace EasyTcpClientServer
 
         public int Port { get; private set; }
 
+        public TCPClient(TcpClient client)
+        {
+            this._TcpClient = client;
+        }
         public TCPClient(string ip, int port)
         {
             this._WaitTimeOut = 1000;
@@ -59,6 +65,7 @@ namespace EasyTcpClientServer
             }
         }
 
+       
 
         private byte[] SendRequest(byte[] cmd)
         {
@@ -76,7 +83,7 @@ namespace EasyTcpClientServer
                 }
 
 
-                using (NetworkStream netStream = this._TcpClient.GetStream())
+                using (EasyNetWorkStream  netStream = this.GetStream())
                 {
                     // Schreiben der Daten
                     netStream.Write(cmd, 0, cmd.Length);
@@ -251,15 +258,61 @@ namespace EasyTcpClientServer
             }
         }
 
+        public bool Connected => this._TcpClient.Connected;
+
+        public bool IsStillConnected()
+        {
+            bool blockingState = this._TcpClient.Client.Blocking;
+            try
+            {
+                byte [] tmp = new byte[1];
+
+                this._TcpClient.Client.Blocking = false;
+                this._TcpClient.Client.Send(tmp, 0, 0);
+                
+            }
+            catch (SocketException e) 
+            {
+                // 10035 == WSAEWOULDBLOCK
+                if (e.NativeErrorCode.Equals(10035))
+                    Debug.WriteLine("Still Connected, but the Send would block");
+                else
+                {
+                    Debug.WriteLine("Disconnected: error code {0}!", e.NativeErrorCode);
+                }
+            }
+            finally
+            {
+                this._TcpClient.Client.Blocking = blockingState;
+            }
+
+            return this._TcpClient.Client.Connected;
+        }
+
+        public int ReceiveBufferSize
+        {
+            get => this._TcpClient.ReceiveBufferSize;
+
+        }
+
         public event EventHandler<RequestProcessErrorEventArgs> RequestProcessError;
 
         public event EventHandler<RequestProcessSuccessEventArgs> RequestProcessSuccess;
 
         private TcpClient _TcpClient;
 
+        public EasyNetWorkStream GetStream()
+        {
+            return new EasyNetWorkStream(this._TcpClient.Client, true);
+        }
         public void Dispose()
         {
             Stop();
+        }
+
+        public void Close()
+        {
+            this._TcpClient.Close();
         }
     }
 }

@@ -8,8 +8,11 @@ namespace Implementation.ClientAddIn
     {
         public RequestProcessGa():base(true,Encoding.ASCII.GetBytes("Hallo"))
         {
-            this.NextMessageToSend = Encoding.ASCII.GetBytes( "hallo");
+            this.NextMessageToSend = this.Encoding.GetBytes( "hallo");
         }
+
+       
+
         protected override void Process(byte[] message)
         {
             string msg = Encoding.ASCII.GetString(message);
@@ -17,16 +20,16 @@ namespace Implementation.ClientAddIn
             {
                 case "aaa":
                     //Console.WriteLine(@"Message:" + message);
-                    this.NextMessageToSend = Encoding.ASCII.GetBytes( "bbb");
-                    
+                    this.NextMessageToSend = this.Encoding.GetBytes( "bbb");
+                    this.ReturnMessages.Add(new byte[] { 0x80, 0x00, 0x00 });
                     break;
 
                 case "bbb":
-                    this.NextMessageToSend =Encoding.ASCII.GetBytes( "aaa");
+                    this.NextMessageToSend =this.Encoding.GetBytes( "aaa");
                     
                     break;
                 default:
-                    this.ReturnMessage = Encoding.ASCII.GetBytes("");
+                    this.ReturnMessage = this.Encoding.GetBytes("");
                     break;
             }
         }
