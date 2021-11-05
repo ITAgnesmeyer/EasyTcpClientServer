@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 
@@ -28,7 +29,19 @@ namespace EasyTcpClientServer
         {
             return this.Socket;
         }
+        public int TryRead(byte[] destination, int startPos, int len)
+        {
+            try
+            {
+               return this.Read(destination, startPos , len);
+            }
+            catch (Exception ex)
+            {
 
+                Debug.Print("TryRead:" + ex.Message);
+            }
+            return -1;
+        }
         public bool Connected => this.Socket.Connected;
 
         public bool IsConnected()
@@ -53,11 +66,26 @@ namespace EasyTcpClientServer
                     Console.WriteLine("Disconnected: error code {0}!", e.NativeErrorCode);
                 }
             }
+            catch(ObjectDisposedException e)
+            {
+                Console.WriteLine("Socket Dispased:" + e.Message);
+                return false;
+            }
             finally
             {
-                this.Socket.Blocking = blockingState;
+                try
+                {
+                    this.Socket.Blocking = blockingState;
+                }
+                catch (Exception ex)
+                {
+
+                    Console.WriteLine("Socked error:" + ex.Message);
+                }
+                
             }
 
+            
             return this.Socket.Connected;
         }
 

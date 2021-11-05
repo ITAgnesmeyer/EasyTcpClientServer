@@ -67,7 +67,7 @@ namespace EasyTcpClientServer
             }
         }
 
-       
+
 
         private byte[] SendRequest(byte[] cmd)
         {
@@ -83,19 +83,31 @@ namespace EasyTcpClientServer
                     this._TcpClient = null;
                     InitTcpClient();
                 }
+                if (this._TcpClient == null) return null;
 
+                
+                if(this._TcpClient.Connected == false )
+                    return null;
 
-                using (EasyNetWorkStream  netStream = this.GetStream())
+                using (EasyNetWorkStream netStream = this.GetStream())
                 {
                     // Schreiben der Daten
-                    netStream.Write(cmd, 0, cmd.Length);
+                    //var asyncWriteResult = netStream.BeginWrite(cmd, 0, cmd.Length, AsyncWrite, netStream);
+                    //netStream.EndWrite(asyncWriteResult );
 
+
+                    netStream.Write(cmd, 0, cmd.Length);
+                    
                     if (netStream.CanRead)
                     {
                         byte[] bytes = new byte[8192];
 
+                        //var asyncResult = netStream.BeginRead(bytes, 0, bytes.Length, AsyncRead,netStream);
+                        //int counter = netStream.EndRead(asyncResult);
 
-                        int counter = netStream.Read(bytes, 0, bytes.Length);
+                        int counter = netStream.TryRead(bytes, 0, bytes.Length);
+                        if(counter == -1)
+                           return null;
                         returnValue = new byte[counter];
                         Array.Copy(bytes, 0, returnValue, 0, returnValue.Length);
 
@@ -115,6 +127,20 @@ namespace EasyTcpClientServer
             }
         }
 
+        private void AsyncWrite(IAsyncResult ar)
+        {
+            EasyNetWorkStream str = ar.AsyncState as EasyNetWorkStream;
+            if(str?.IsConnected() == false )
+               throw new Exception("Socket disconnected!");
+        }
+
+        private void AsyncRead(IAsyncResult ar)
+        {
+            EasyNetWorkStream str = ar.AsyncState as EasyNetWorkStream;
+            if(str?.IsConnected() == false )
+                throw new Exception("Socket disconnected!");
+            
+        }
 
         private void SendRequestMessages()
         {
@@ -128,15 +154,17 @@ namespace EasyTcpClientServer
         {
             byte[] response = SendRequest(requestProcess.NextMessageToSend);
             requestProcess.NextMessageToSend = Array.Empty<byte>();
-
+            if(response == null) return;
             ExecuteRequestProcess(requestProcess, response);
         }
 
         private void ExecuteRequestProcess(RequestProcessBase requestProcess, byte[] data)
         {
+            //requestProcess.InProcess = true;
             requestProcess.Start(data);
             if (!requestProcess.Success)
             {
+                //requestProcess.InProcess = false;
                 RequestProcessErrorEventArgs requestProcessErrorEventArg = new RequestProcessErrorEventArgs()
                 {
                     ClientMessage = data,
@@ -146,13 +174,14 @@ namespace EasyTcpClientServer
             }
             else
             {
-
+                //requestProcess.InProcess = false;
                 OnRequestProcessSuccess(requestProcess, new RequestProcessSuccessEventArgs()
                 {
                     Message = data
                 });
-                if (requestProcess.NextMessageToSend.Length > 0 && data != requestProcess.NextMessageToSend && requestProcess.SendBackToClient)
+                if ((requestProcess.NextMessageToSend.Length > 0 && data != requestProcess.NextMessageToSend && requestProcess.SendBackToClient) || (requestProcess.ReturnMessages.Count > 0 && requestProcess.SendBackToClient))
                     this.Send();
+
             }
         }
 
@@ -267,13 +296,13 @@ namespace EasyTcpClientServer
             bool blockingState = this._TcpClient.Client.Blocking;
             try
             {
-                byte [] tmp = new byte[1];
+                byte[] tmp = new byte[1];
 
                 this._TcpClient.Client.Blocking = false;
                 this._TcpClient.Client.Send(tmp, 0, 0);
-                
+
             }
-            catch (SocketException e) 
+            catch (SocketException e)
             {
                 // 10035 == WSAEWOULDBLOCK
                 if (e.NativeErrorCode.Equals(10035))
@@ -309,9 +338,16 @@ namespace EasyTcpClientServer
         }
         public void Dispose()
         {
-            Stop();
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
-
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Stop();
+            }
+        }
         public void Close()
         {
             this._TcpClient.Close();

@@ -11,7 +11,7 @@ namespace EasyTcpClientServer
 {
     // ReSharper disable once InconsistentNaming
     // ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
-    public class TCPServer: IDisposable
+    public class TCPServer : IDisposable
     {
         #region Fields.
 
@@ -74,7 +74,13 @@ namespace EasyTcpClientServer
             this._Listener.BeginAcceptTcpClient(ProcessRequest, this._Listener);
             this._IsRunning = true;
         }
-
+        private void AddRequestProcessDirectSendAction(Action<RequestProcessBase> sendBackAction)
+        {
+            foreach (var item in this._RequestProcesses)
+            {
+                item.SendBackAction = sendBackAction;
+            }
+        }
         public void RegisterRequestProcess(RequestProcessBase process)
         {
             this._RequestProcesses.Add(process);
@@ -95,13 +101,13 @@ namespace EasyTcpClientServer
             {
                 try
                 {
-                    
+
                     var assembly = Assembly.LoadFile(fileInfo.FullName);
-                    
+
                     var types = assembly.GetTypes();
                     foreach (Type type in types)
                     {
-                        if (type.BaseType == typeof( RequestProcessBase))
+                        if (type.BaseType == typeof(RequestProcessBase))
                         {
                             try
                             {
@@ -111,9 +117,9 @@ namespace EasyTcpClientServer
                             catch (Exception e)
                             {
                                 Console.WriteLine(e);
-                                
+
                             }
-                            
+
 
                         }
                     }
@@ -121,7 +127,7 @@ namespace EasyTcpClientServer
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
-                    
+
                 }
             }
 
@@ -155,7 +161,7 @@ namespace EasyTcpClientServer
         #region Private.
 
         //Process single request.
-        private  void ProcessRequest(IAsyncResult ar)
+        private void ProcessRequest(IAsyncResult ar)
         {
             //Stop if operation was cancelled.
             if (this._Stop)
@@ -179,37 +185,65 @@ namespace EasyTcpClientServer
             //listener.AcceptTcpClientAsync()
             TCPClient client = new TCPClient(listener.EndAcceptTcpClient(ar));
             //TcpClient client = await listener.AcceptTcpClientAsync(); //listener.EndAcceptTcpClient(ar);
-            
+
             while (client.Connected == false)
             {
                 Thread.Sleep(10);
             }
+            AddRequestProcessDirectSendAction((process) =>
+            {
+                if (process.ReturnMessage != Array.Empty<byte>() && process.ReturnMessage.Length > 0)
+                {
 
+                    RequestProcessBase.SendMessageToClient(client, process.ReturnMessage);
+
+                }
+
+                if (process.ReturnMessages.Count > 0)
+                {
+                    int len = process.ReturnMessages.Count;
+                    for (int i = 0; i < len; i++)
+                    {
+                        byte[] bytesToSend = process.ReturnMessages.Dequeue();
+                        if (bytesToSend != Array.Empty<byte>())
+                        {
+
+                            RequestProcessBase.SendMessageToClient(client, bytesToSend);
+
+                        }
+
+                    }
+                }
+
+            });
             while (client.Connected)
             {
                 int bytesRead = 0;
                 byte[] message = RequestProcessBase.GetClientMessage(client, ref bytesRead);
-                if (!client.IsStillConnected() )
+                if (!client.IsStillConnected())
                 {
-                  
+
                     client.Close();
-                   break;
+                    break;
 
                 }
 
-                if (message != Array.Empty<byte>())
+                if (message != Array.Empty<byte>() && message.Length > 0)
                 {
                     try
                     {
-                        ExecuteRequestProcess(client, message);
+                        lock (client)
+                        {
+                            ExecuteRequestProcess(client, message);
+                        }
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine( "ExecuteRequestProcess error:" + e.Message);
+                        Console.WriteLine("ExecuteRequestProcess error:" + e.Message);
                     }
-                    
+
                 }
-                    
+
             }
         }
 
@@ -217,6 +251,7 @@ namespace EasyTcpClientServer
         {
             foreach (var item in this._RequestProcesses)
             {
+                item.InProcess = true;
                 item.Start(message);
                 if (item.Success)
                 {
@@ -225,11 +260,11 @@ namespace EasyTcpClientServer
 
                         if (item.ReturnMessage != Array.Empty<byte>())
                         {
-                            //Thread.Sleep(100);
-                            RequestProcessBase.SendMessageToClient(client, item.ReturnMessage);
-                            
-                        }
 
+                            RequestProcessBase.SendMessageToClient(client, item.ReturnMessage);
+
+                        }
+                        Thread.Sleep(100);
                         if (item.ReturnMessages.Count > 0)
                         {
                             int len = item.ReturnMessages.Count;
@@ -238,7 +273,7 @@ namespace EasyTcpClientServer
                                 byte[] bytesToSend = item.ReturnMessages.Dequeue();
                                 if (bytesToSend != Array.Empty<byte>())
                                 {
-                                    //Thread.Sleep(100);
+                                    Thread.Sleep(100);
                                     RequestProcessBase.SendMessageToClient(client, bytesToSend);
                                 }
 
@@ -246,20 +281,23 @@ namespace EasyTcpClientServer
                         }
 
                     }
-                        
 
+                    item.InProcess = false;
 
-                    RequestProcessSuccessEventArgs e = new RequestProcessSuccessEventArgs {Message = message};
+                    RequestProcessSuccessEventArgs e = new RequestProcessSuccessEventArgs { Message = message };
                     OnRequestProcessSuccess(item, e);
                 }
                 else
                 {
+                    item.InProcess = false;
                     RequestProcessErrorEventArgs e = new RequestProcessErrorEventArgs
                     {
-                        ClientMessage = message, ExceptionMessage = item.ExceptionMessage
+                        ClientMessage = message,
+                        ExceptionMessage = item.ExceptionMessage
                     };
                     OnRequestProcessError(item, e);
                 }
+
             }
         }
 
@@ -282,7 +320,15 @@ namespace EasyTcpClientServer
 
         public void Dispose()
         {
-            Stop();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Stop();
+            }
         }
     }
 }
